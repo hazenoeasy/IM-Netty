@@ -2,6 +2,8 @@ package plus.yuhaozhang.server.Session;
 
 import io.netty.channel.Channel;
 
+import java.util.Map;
+
 /**
  * @author Yuh Z
  * @date 1/14/22
@@ -43,5 +45,6 @@ public interface Session {
      */
     Channel getChannel(String username);
 
+    Map<String, Channel> getMap();
 
 }

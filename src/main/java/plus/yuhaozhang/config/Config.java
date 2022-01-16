@@ -1,6 +1,7 @@
 package plus.yuhaozhang.config;
 
 import plus.yuhaozhang.protocol.Serializer;
+import plus.yuhaozhang.protocol.SerializerEnum;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +13,7 @@ import java.util.Properties;
  */
 public abstract class Config {
     static Properties properties;
+
     static {
         try (InputStream in = Config.class.getResourceAsStream("/application.properties")) {
             properties = new Properties();
@@ -28,12 +30,12 @@ public abstract class Config {
             return Integer.parseInt(value);
         }
     }
-    public static Serializer.Algorithm getSerializerAlgorithm() {
+    public static SerializerEnum getSerializerAlgorithm() {
         String value = properties.getProperty("serializer.algorithm");
         if(value == null) {
-            return Serializer.Algorithm.Java;
+            return SerializerEnum.Java;
         } else {
-            return Serializer.Algorithm.valueOf(value);
+            return SerializerEnum.valueOf(value);
         }
     }
 }

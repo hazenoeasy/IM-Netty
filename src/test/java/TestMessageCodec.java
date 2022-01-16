@@ -15,7 +15,7 @@ import plus.yuhaozhang.protocol.MessageCodec;
 @Slf4j
 public class TestMessageCodec {
     public static void main(String[] args) throws Exception {
-        EmbeddedChannel embeddedChannel = new EmbeddedChannel(new LoggingHandler(LogLevel.DEBUG), new MessageCodec(),
+        EmbeddedChannel embeddedChannel = new EmbeddedChannel(new MessageCodec(),
                 new LengthFieldBasedFrameDecoder(1024,12,4,0,0));
         LoginRequestMessage loginRequestMessage = new LoginRequestMessage("zhangsan", "lisi");
         // encode

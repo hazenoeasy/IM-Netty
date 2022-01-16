@@ -42,28 +42,28 @@ public class ChatClient {
                 @Override
                 protected void initChannel(SocketChannel socketChannel) throws Exception {
                     socketChannel.pipeline().addLast(new ProtocolFrameDecoder());
-                    socketChannel.pipeline().addLast(loggingHandler);
-                    socketChannel.pipeline().addLast(new IdleStateHandler(5, 0, 0));
+                    //socketChannel.pipeline().addLast(loggingHandler);
+                    socketChannel.pipeline().addLast(messageCodec);
+                    socketChannel.pipeline().addLast(new IdleStateHandler(0, 10, 0));
                     // 读写双向handler
                     socketChannel.pipeline().addLast(new ChannelDuplexHandler() {
                         @Override
                         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-                            //  用来触发特殊事件
-                            if (evt instanceof IdleStateEvent) {
-                                IdleStateEvent event = (IdleStateEvent) evt;
-                                // 触发读事件
-                                if (event.state() == IdleState.READER_IDLE) {
-                                    ctx.close();
-                                }
+                            IdleStateEvent event = (IdleStateEvent) evt;
 
+                            //  用来触发特殊事件
+                            if (event.state() == IdleState.WRITER_IDLE) {
+                                //                                log.debug("3s 没有写数据了，发送一个心跳包");
+                                ctx.writeAndFlush(new PingMessage());
                             }
                         }
                     });
-                    socketChannel.pipeline().addLast(messageCodec);
                     socketChannel.pipeline().addLast(new ChannelInboundHandlerAdapter(){
                         @Override
                         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                            log.debug("read: {}", msg);
+                            if(!(msg instanceof PingMessage)){
+                                log.debug("read: {}", msg);
+                            }
                             if(msg instanceof LoginResponseMessage){
                                 if(((LoginResponseMessage)msg).isSuccess()){
                                     LOGIN.set(true);
@@ -115,6 +115,7 @@ public class ChatClient {
                                     String[] s = command.split(" ");
                                     switch (s[0]){
                                         case "send":
+                                            System.out.println("send....");
                                             ctx.writeAndFlush(new ChatRequestMessage(username, s[1], s[2]));
                                             break;
                                         case "gsend":

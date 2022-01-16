@@ -22,7 +22,9 @@ public abstract class Message implements Serializable {
      * sdfs
      * @return sdf
      */
-    public abstract int getMessageType();
+    public static Class<? extends Message> getMessageClass(int messageType) {
+        return messageClasses.get(messageType);
+    }
     public static final byte[] magic = new byte[]{1,2,3,4};
     public static final int LoginRequestMessage = 0;
     public static final int LoginResponseMessage = 1;
@@ -40,5 +42,25 @@ public abstract class Message implements Serializable {
     public static final int GroupMembersResponseMessage = 13;
     public static final int PingMessage = 14;
     public static final int PongMessage = 15;
-    private static final Map<Integer,Class<?>> message = new HashMap<>();
+    private static final Map<Integer,Class<? extends Message>> messageClasses = new HashMap<>();
+    static {
+        messageClasses.put(LoginRequestMessage, LoginRequestMessage.class);
+        messageClasses.put(LoginResponseMessage, LoginResponseMessage.class);
+        messageClasses.put(ChatRequestMessage, ChatRequestMessage.class);
+        messageClasses.put(ChatResponseMessage, ChatResponseMessage.class);
+        messageClasses.put(GroupCreateRequestMessage, GroupCreateRequestMessage.class);
+        messageClasses.put(GroupCreateResponseMessage, GroupCreateResponseMessage.class);
+        messageClasses.put(GroupJoinRequestMessage, GroupJoinRequestMessage.class);
+        messageClasses.put(GroupJoinResponseMessage, GroupJoinResponseMessage.class);
+        messageClasses.put(GroupQuitRequestMessage, GroupQuitRequestMessage.class);
+        messageClasses.put(GroupQuitResponseMessage, GroupQuitResponseMessage.class);
+        messageClasses.put(GroupChatRequestMessage, GroupChatRequestMessage.class);
+        messageClasses.put(GroupChatResponseMessage, GroupChatResponseMessage.class);
+        messageClasses.put(GroupMembersRequestMessage, GroupMembersRequestMessage.class);
+        messageClasses.put(GroupMembersResponseMessage, GroupMembersResponseMessage.class);
+        messageClasses.put(PingMessage,PingMessage.class);
+        messageClasses.put(PongMessage,PongMessage.class);
+        //messageClasses.put(RPC_MESSAGE_TYPE_REQUEST, RpcRequestMessage.class);
+        //messageClasses.put(RPC_MESSAGE_TYPE_RESPONSE, RpcResponseMessage.class);
+    }
 }

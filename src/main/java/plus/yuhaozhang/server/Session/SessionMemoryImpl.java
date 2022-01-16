@@ -1,6 +1,7 @@
 package plus.yuhaozhang.server.Session;
 
 import io.netty.channel.Channel;
+import lombok.Data;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Yuh Z
  * @date 1/14/22
  */
+@Data
 public class SessionMemoryImpl implements Session {
 
 
@@ -39,7 +41,10 @@ public class SessionMemoryImpl implements Session {
     public void setAttribute(Channel channel, String name, Object value) {
         channelAttributesMap.get(channel).put(name, value);
     }
-
+    @Override
+    public Map<String, Channel> getMap(){
+        return usernameChannelMap;
+    }
     @Override
     public Channel getChannel(String username) {
         return usernameChannelMap.get(username);

@@ -1,10 +1,7 @@
 package plus.yuhaozhang.server;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -26,7 +23,7 @@ import plus.yuhaozhang.protocol.ProtocolFrameDecoder;
 @Slf4j
 public class ChatServer {
     public static void main(String[] args) {
-        NioEventLoopGroup boss = new NioEventLoopGroup(1);
+        NioEventLoopGroup boss = new NioEventLoopGroup();
         NioEventLoopGroup workers = new NioEventLoopGroup();
         final ChatRequestMessageHandler chatRequestMessageHandler = new ChatRequestMessageHandler();
         final LoginRequestMessageHandler loginRequestMessageHandler = new LoginRequestMessageHandler();
@@ -42,28 +39,26 @@ public class ChatServer {
                     .group(boss, workers)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
-                        protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        protected void initChannel(SocketChannel socketChannel) {
                             socketChannel.pipeline()
                                     .addLast(new ProtocolFrameDecoder());
                             socketChannel.pipeline().addLast(loggingHandler);
-                            socketChannel.pipeline().addLast(new IdleStateHandler(0, 3, 0));
+                            socketChannel.pipeline().addLast(messageCodec);
+                            socketChannel.pipeline().addLast(new IdleStateHandler(100, 0, 0));
                             // 读写双向handler
                             socketChannel.pipeline().addLast(new ChannelDuplexHandler() {
                                 @Override
-                                public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+                                public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
                                     //  用来触发特殊事件
                                     if (evt instanceof IdleStateEvent) {
                                         IdleStateEvent event = (IdleStateEvent) evt;
                                         // 触发读事件
-                                        if (event.state() == IdleState.WRITER_IDLE) {
-                                            //ctx.close();
-                                            ctx.writeAndFlush(new PingMessage());
+                                        if (event.state() == IdleState.READER_IDLE) {
+                                            ctx.channel().close();
                                         }
-
                                     }
                                 }
                             });
-                            socketChannel.pipeline().addLast(messageCodec);
                             socketChannel.pipeline().addLast(loginRequestMessageHandler);
                             socketChannel.pipeline().addLast(chatRequestMessageHandler);
                             socketChannel.pipeline().addLast(groupCreateRequestMessageHandler);
