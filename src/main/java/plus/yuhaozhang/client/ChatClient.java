@@ -37,6 +37,7 @@ public class ChatClient {
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.channel(NioSocketChannel.class);
+            bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,5000);
             bootstrap.group(eventLoopGroup);
             bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
